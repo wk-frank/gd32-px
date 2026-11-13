@@ -1,0 +1,13 @@
+功能域,逻辑信号,目标MCU外设/定时器,物理引脚,复用功能(AF),DMA/EXTI需求,核实状态
+Console,NSH_UART_TX/RX,待确认(USARTx),待确认,待确认,可选DMA,待原理图确认
+IMU1,SPI_SCK/MISO/MOSI/CS/DRDY,待确认(SPIx),待确认,待确认,SPI DMA + EXTI DRDY,待原理图确认
+Baro,I2C_SCL/SDA 或 SPI,待确认,待确认,待确认,I2C/SPI,待原理图确认
+Motor1-4,PWM/DShot_CH1..4,待确认(TIMERx),待确认,待确认,DShot需DMAMUX,待原理图确认
+TELEM1,MAVLINK_UART_TX/RX,待确认(USARTx),待确认,待确认,DMA TX/RX,待原理图确认
+GPS1,GPS_UART_TX/RX,待确认(USARTx),待确认,待确认,DMA RX,待原理图确认
+RC_IN,CRSF/SBUS_RX/TX,待确认(USARTx),待确认,待确认,可选单线/反向,待原理图确认
+Power,VBAT_ADC / IBAT_ADC,待确认(ADCx),待确认,模拟输入,ADC DMA,待原理图确认
+SDCard,SDIO_CLK/CMD/D0..D3,待确认(SDIOx),待确认,待确认,IDMA/DMA,待原理图确认
+CAN1,CAN_TX/RX,待确认(CANx),待确认,待确认,Message RAM,待原理图确认
+USB,USB_DP/DM/VBUS,待确认(USBHS/FS),待确认,待确认,内置DMA/FIFO,待原理图确认
+Debug,SWDIO/SWCLK,SWD,PA13/PA14(待核实),AF0,无,待原理图确认

@@ -1,0 +1,18 @@
+=== GD32H757 PX4/NuttX 环境核查 2026-11-13T15:52:28Z ===
+Host: Linux ace 6.12.105+ #1 SMP Sat Sep 19 19:37:41 UTC 2026 x86_64 GNU/Linux
+PWD: /working_dir
+[OK] git -> /usr/bin/git (git version 2.39.5)
+[OK] python3 -> /usr/bin/python3 (Python 3.11.2)
+[OK] gcc -> /usr/bin/gcc (gcc (Debian 12.2.0-14+deb12u1) 12.2.0)
+[OK] g++ -> /usr/bin/g++ (g++ (Debian 12.2.0-14+deb12u1) 12.2.0)
+[OK] make -> /usr/bin/make (GNU Make 4.3)
+[MISSING] cmake
+[MISSING] ninja
+[MISSING] arm-none-eabi-gcc
+[MISSING] kconfig-mconf
+[MISSING] genromfs
+--- 磁盘空间 ---
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vdb         19G  466M   19G   3% /working_dir
+--- 汇总 ---
+RESULT: BLOCKED_MISSING_TOOLS (missing=5)
