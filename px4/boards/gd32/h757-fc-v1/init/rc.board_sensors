@@ -1,0 +1,22 @@
+#
+# Sensor startup script for gd32_h757-fc-v1 (PX4 v1.17.0)
+#
+
+# Primary IMU: TDK ICM-42688-P on SPI0 (PX4 bus 1)
+icm42688p -s -b 1 start
+
+# Redundant IMU: Bosch BMI088 on SPI1 (PX4 bus 2)
+bmi088 -A -s -b 2 start
+bmi088 -G -s -b 2 start
+
+# Barometer: Bosch BMP390 on I2C0 (PX4 bus 1)
+bmp390 -I -b 1 start
+
+# Onboard Magnetometer: Bosch BMM150 on I2C0 (PX4 bus 1)
+bmm150 -I -b 1 start
+
+# External Magnetometer on I2C1 (PX4 bus 2)
+ist8310 -X -b 2 start
+
+# Power Monitor: TI INA226 on I2C2 (PX4 bus 3)
+ina226 -I -b 3 start

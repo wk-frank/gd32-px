@@ -1,0 +1,19 @@
+#
+# Default parameters for gd32_h757-fc-v1 (Quadrotor X baseline)
+#
+
+# 四旋翼 X 布局（Airframe 4001 Generic Quadcopter）
+param set-default SYS_AUTOSTART 4001
+
+# 默认启用 MAVLink 2（PX4 v1.17.0 标准）
+param set-default MAV_0_CONFIG 101
+param set-default MAV_0_MODE 0
+param set-default MAV_0_RATE 57600
+param set-default SER_TEL1_BAUD 57600
+
+# GPS1 (UART6) & RC (UART7)
+param set-default GPS_1_CONFIG 201
+param set-default RC_PORT_CONFIG 301
+
+# 启用 IMU 加热与气压计 GNSS 自动校准
+param set-default SENS_BAR_AUTOCAL 1

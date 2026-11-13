@@ -1,4 +1,7 @@
 === M1 主机侧静态编译与单元测试 ===
 M1 host unit test PASS: cache_mpu & memorymap checks succeeded.
-=== 头文件语法检查 (board.h) ===
-board.h syntax check PASS
+=== 头文件语法检查 (board.h / board_config.h) ===
+px4/boards/gd32/h757-fc-v1/src/board_config.h:8:9: error: #pragma once in main file [-Werror]
+    8 | #pragma once
+      |         ^~~~
+cc1: all warnings being treated as errors

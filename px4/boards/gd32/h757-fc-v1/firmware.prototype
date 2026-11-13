@@ -1,0 +1,12 @@
+{
+    "board_id": 65501,
+    "magic": "PX4FWv1",
+    "description": "Custom GD32H757ZMT6 Flight Controller v1 (Reference Design - Reserve Official Board ID before release)",
+    "image": "",
+    "build_time": 0,
+    "summary": "gd32_h757-fc-v1",
+    "version": "0.1",
+    "image_size": 0,
+    "git_identity": "",
+    "board_revision": 0
+}
