@@ -15,15 +15,15 @@ gcc -Wall -Wextra -Werror -std=c11 \
 ./build/host/test_cache_mpu
 
 echo "=== 头文件语法检查 (board.h / board_config.h) ==="
-gcc -Wall -Wextra -Werror -std=c11 -x c -fsyntax-only \
-  nuttx/boards/arm/gd32h73x_75x/gd32h757-fc-v1/include/board.h
-gcc -Wall -Wextra -Werror -std=c11 -x c -fsyntax-only \
-  px4/boards/gd32/h757-fc-v1/src/board_config.h
+gcc -Wall -Wextra -Werror -std=c11 -Inuttx/boards/arm/gd32h73x_75x/gd32h757-fc-v1/include \
+  -x c -fsyntax-only - <<< '#include "board.h"'
+gcc -Wall -Wextra -Werror -std=c11 -Ipx4/boards/gd32/h757-fc-v1/src \
+  -x c -fsyntax-only - <<< '#include "board_config.h"'
 echo "board.h & board_config.h syntax check PASS"
 
-echo "=== JSON 元数据与引脚冲突检查 ==="
+echo "=== JSON 元数据与引脚表检查 ==="
 python3 - <<'PY'
-import csv, json, sys
+import csv, json
 
 with open("px4/boards/gd32/h757-fc-v1/firmware.prototype", "r", encoding="utf-8") as f:
     meta = json.load(f)
