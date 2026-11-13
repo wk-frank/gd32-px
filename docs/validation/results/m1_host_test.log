@@ -1,0 +1,4 @@
+=== M1 主机侧静态编译与单元测试 ===
+M1 host unit test PASS: cache_mpu & memorymap checks succeeded.
+=== 头文件语法检查 (board.h) ===
+board.h syntax check PASS

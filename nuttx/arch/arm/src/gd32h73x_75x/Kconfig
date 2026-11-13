@@ -1,0 +1,37 @@
+# GD32H73x/75x NuttX Kconfig 骨架（对齐 GD32-MCU-IOT/gd32_nuttx 目录规范）
+# 状态：M1 骨架，待合入 PX4 platforms/nuttx/NuttX 后由 kconfig-mconf 验证
+
+if ARCH_CHIP_GD32H73X_75X
+
+choice
+	prompt "GD32H73x/75x Chip Selection"
+	default ARCH_CHIP_GD32H757ZM
+
+config ARCH_CHIP_GD32H757ZM
+	bool "GD32H757ZMT6 (Cortex-M7, 600MHz, 3840KB Flash, 1024KB SRAM, LQFP144)"
+	select GD32H7_HAVE_CANFD
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_ICACHE
+	select ARCH_HAVE_DCACHE
+	select ARCH_HAVE_MPU
+
+endchoice
+
+config GD32H7_FLASH_SIZE_KB
+	int "On-chip Flash size (KB)"
+	default 3840 if ARCH_CHIP_GD32H757ZM
+
+config GD32H7_SRAM_TOTAL_KB
+	int "On-chip SRAM total size (KB)"
+	default 1024 if ARCH_CHIP_GD32H757ZM
+
+config GD32H7_SYSCLK_MAX_MHZ
+	int "Maximum CPU clock frequency (MHz)"
+	default 600
+
+config GD32H7_HAVE_CANFD
+	bool
+	default n
+
+endif # ARCH_CHIP_GD32H73X_75X
