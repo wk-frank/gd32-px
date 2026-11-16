@@ -1,20 +1,24 @@
 /****************************************************************************
  * boards/arm/gd32h73x_75x/gd32h757-fc-v1/scripts/flash.ld
  *
- * GD32H757ZMT6 最小启动链接脚本（M1 骨架）
- * Flash: 3840 KB @ 0x08000000（预留 Bootloader 偏移前暂从 0x08000000 起）
- * SRAM:  512 KB AXI SRAM @ 0x24000000 + 512 KB 共享 ITCM/DTCM/AXI
- *        本骨架默认按 128 KB ITCM + 256 KB DTCM + 128 KB 扩展 AXI（待核实选项字节）
+ * GD32H757ZMT6 飞控固件链接脚本（预留前 128KB 给 PX4 Bootloader，主固件占 3712KB）
+ * 存储分区已对照 gd32h759im_memorymap.h 与 GD32H757 Datasheet 核实：
+ *   FLASH   : 0x08020000, 3712K (Bootloader 位于 0x08000000..0x0801FFFF)
+ *   ITCM    : 0x00000000,  128K (高频控制/向量表加速区)
+ *   DTCM    : 0x20000000,  256K (零等待内核栈/.data/.bss，注意通用DMA不可达)
+ *   AXISRAM : 0x24000000,  512K (通用DMA缓冲与主堆区，32-byte cache line对齐)
+ *   SRAM0_1 : 0x30000000,   32K (AHB外设DMA缓冲专用区)
+ *   BKPSRAM : 0x38800000,    4K (HardFault CrashDump与Bootloader通信区)
  ****************************************************************************/
 
 MEMORY
 {
-  /* TODO: M3/M5 引入 PX4 Bootloader 后调整 ORIGIN 与 LENGTH（如 +128K） */
-  FLASH    (rx)  : ORIGIN = 0x08000000, LENGTH = 3840K
-  ITCM     (rwx) : ORIGIN = 0x00000000, LENGTH = 128K
-  DTCM     (rwx) : ORIGIN = 0x20000000, LENGTH = 256K
-  AXISRAM  (rwx) : ORIGIN = 0x24000000, LENGTH = 512K
-  BKPSRAM  (rwx) : ORIGIN = 0x38800000, LENGTH = 4K
+  FLASH   (rx)  : ORIGIN = 0x08020000, LENGTH = 3712K
+  ITCM    (rwx) : ORIGIN = 0x00000000, LENGTH = 128K
+  DTCM    (rwx) : ORIGIN = 0x20000000, LENGTH = 256K
+  AXISRAM (rwx) : ORIGIN = 0x24000000, LENGTH = 512K
+  SRAM0_1 (rwx) : ORIGIN = 0x30000000, LENGTH = 32K
+  BKPSRAM (rwx) : ORIGIN = 0x38800000, LENGTH = 4K
 }
 
 OUTPUT_ARCH(arm)
@@ -25,14 +29,31 @@ SECTIONS
   .text :
   {
     _stext = ABSOLUTE(.);
-    *(.vectors)
+    KEEP(*(.vectors))
     *(.text .text.*)
+    *(.gnu.linkonce.t.*)
     *(.rodata .rodata.*)
+    *(.gnu.linkonce.r.*)
     . = ALIGN(4);
     _etext = ABSOLUTE(.);
   } > FLASH
 
+  .ARM.exidx :
+  {
+    __exidx_start = ABSOLUTE(.);
+    *(.ARM.exidx*)
+    __exidx_end = ABSOLUTE(.);
+  } > FLASH
+
   _eronly = ABSOLUTE(.);
+
+  .itcmfunc :
+  {
+    _sitcm = ABSOLUTE(.);
+    *(.itcmfunc .itcmfunc.*)
+    . = ALIGN(4);
+    _eitcm = ABSOLUTE(.);
+  } > ITCM AT > FLASH
 
   .data :
   {
@@ -47,11 +68,11 @@ SECTIONS
     _sbss = ABSOLUTE(.);
     *(.bss .bss.*)
     *(COMMON)
-    . = ALIGN(4);
+    . = ALIGN(8);
     _ebss = ABSOLUTE(.);
   } > DTCM
 
-  /* 通用 DMA 缓冲区必须置于 AXI SRAM 并按 32-byte cache line 对齐 */
+  /* 通用外设 DMA 静态缓冲区（强制置于 AXI SRAM 并 32-byte 对齐） */
   .dma_buffer (NOLOAD) :
   {
     . = ALIGN(32);
@@ -60,4 +81,18 @@ SECTIONS
     . = ALIGN(32);
     _edma_buffer = ABSOLUTE(.);
   } > AXISRAM
+
+  /* AHB SRAM0/1 外设缓冲段 */
+  .sram4 (NOLOAD) :
+  {
+    . = ALIGN(32);
+    *(.sram4 .sram4.*)
+    . = ALIGN(32);
+  } > SRAM0_1
+
+  /* 备份域 CrashDump / Bootloader RTC 标志段 */
+  .Fk_bkp (NOLOAD) :
+  {
+    *(.Fk_bkp .Fk_bkp.*)
+  } > BKPSRAM
 }

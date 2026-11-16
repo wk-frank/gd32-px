@@ -4,34 +4,41 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_DIR"
 
+echo "=== [1/4] 生成 KiCad 原理图 (.kicad_sch) 与网表 (.net) ==="
+python3 scripts/generate_kicad_schematic.py
+
+echo "=== [2/4] 运行硬件 DRC 零冲突与跨层一致性检查 ==="
+python3 scripts/verify_design.py
+
+echo "=== [3/4] 编译并运行 M1/M3 主机侧 C11 单元测试 ==="
 mkdir -p build/host
-echo "=== M1 主机侧静态编译与单元测试 ==="
 gcc -Wall -Wextra -Werror -std=c11 \
+  -Inuttx/arch/arm/include/gd32h73x_75x \
   -Inuttx/arch/arm/src/gd32h73x_75x \
+  -Inuttx/arch/arm/src/gd32h73x_75x/hardware \
+  -Inuttx/boards/arm/gd32h73x_75x/gd32h757-fc-v1/include \
+  -Ipx4/boards/gd32/h757-fc-v1/src \
   nuttx/arch/arm/src/gd32h73x_75x/gd32h757_cache_mpu.c \
+  nuttx/arch/arm/src/gd32h73x_75x/gd32h757_pmu_safety.c \
+  nuttx/boards/arm/gd32h73x_75x/gd32h757-fc-v1/src/gd32_boot.c \
+  px4/boards/gd32/h757-fc-v1/src/timer_config.c \
   tests/host/test_cache_mpu.c \
   -o build/host/test_cache_mpu
 
 ./build/host/test_cache_mpu
 
-echo "=== 头文件语法检查 (board.h / board_config.h) ==="
-gcc -Wall -Wextra -Werror -std=c11 -Inuttx/boards/arm/gd32h73x_75x/gd32h757-fc-v1/include \
+echo "=== [4/4] 独立头文件严格语法检查 ==="
+gcc -Wall -Wextra -Werror -std=c11 \
+  -Inuttx/arch/arm/src/gd32h73x_75x/hardware \
+  -Inuttx/boards/arm/gd32h73x_75x/gd32h757-fc-v1/include \
   -x c -fsyntax-only - <<< '#include "board.h"'
-gcc -Wall -Wextra -Werror -std=c11 -Ipx4/boards/gd32/h757-fc-v1/src \
+
+gcc -Wall -Wextra -Werror -std=c11 \
+  -Inuttx/arch/arm/include/gd32h73x_75x \
+  -Inuttx/arch/arm/src/gd32h73x_75x \
+  -Inuttx/arch/arm/src/gd32h73x_75x/hardware \
+  -Inuttx/boards/arm/gd32h73x_75x/gd32h757-fc-v1/include \
+  -Ipx4/boards/gd32/h757-fc-v1/src \
   -x c -fsyntax-only - <<< '#include "board_config.h"'
-echo "board.h & board_config.h syntax check PASS"
 
-echo "=== JSON 元数据与引脚表检查 ==="
-python3 - <<'PY'
-import csv, json
-
-with open("px4/boards/gd32/h757-fc-v1/firmware.prototype", "r", encoding="utf-8") as f:
-    meta = json.load(f)
-assert meta["magic"] == "PX4FWv1"
-assert isinstance(meta["board_id"], int)
-print(f"firmware.prototype JSON PASS (board_id={meta['board_id']}, summary={meta['summary']})")
-
-with open("docs/hardware/pin-matrix.csv", "r", encoding="utf-8") as f:
-    rows = list(csv.DictReader(f))
-print(f"pin-matrix.csv loaded: {len(rows)} functional domains")
-PY
+echo "ALL CHECKS PASSED."

@@ -1,53 +1,144 @@
 /****************************************************************************
  * boards/arm/gd32h73x_75x/gd32h757-fc-v1/include/board.h
  *
- * GD32H757ZMT6 商业飞控参考板卡板级头文件（gd32_h757-fc-v1）
- * 注：AF 编号与寄存器偏移须在合入 gd32_nuttx 后对照 Datasheet 最终签核。
+ * GD32H757ZMT6 商业飞控板级头文件（严格兼容 GD32-MCU-IOT/gd32_nuttx 宏规范）
  ****************************************************************************/
 
 #ifndef __BOARDS_ARM_GD32H73X_75X_GD32H757_FC_V1_INCLUDE_BOARD_H
 #define __BOARDS_ARM_GD32H73X_75X_GD32H757_FC_V1_INCLUDE_BOARD_H
 
-/* 1. 晶振与 PMU 供电模式（参考硬件选型：25 MHz HXTAL + 内部 LDO） */
+#include "gd32h757zm_pinmap.h"
 
-#define BOARD_HXTAL_FREQUENCY_HZ   25000000UL
-#define BOARD_LXTAL_FREQUENCY_HZ   32768UL
-#define BOARD_PMU_SUPPLY_LDO       1          /* 内部 LDO 供 0.9V VCORE，严禁未改硬件切 SMPS */
+/* 1. 板级晶振与 PMU 供电拓扑（25.000 MHz HXTAL + 32.768 kHz LXTAL + 内部 LDO） */
 
-/* 2. 目标时钟树（25 MHz / 5 = 5 MHz -> PLL0N * 120 = 600 MHz VCO -> /1 = 600 MHz） */
+#define GD32_BOARD_SYSCLK_PLL_HXTAL     1
+#define GD32_BOARD_HXTAL                25000000UL
+#define GD32_IRC64M_VALUE               64000000UL
+#define GD32_IRC32K_VALUE               32000U
+#define GD32_HXTAL_VALUE                GD32_BOARD_HXTAL
+#define GD32_LXTAL_VALUE                32768U
+#define GD32_BOARD_PMU_INTERNAL_LDO     1
 
-#define BOARD_PLL0_PSC             5U
-#define BOARD_PLL0_N               120U
-#define BOARD_PLL0_P               1U
-#define BOARD_PLL0_Q               12U        /* 50 MHz（可用于 SPI/SDIO 分频基准，待核实） */
-#define BOARD_PLL0_R               2U
+/* 2. PLL0 与总线分频配置（严格对齐 gd32_nuttx gd32h759im-eval/include/board.h）
+ *    VCO = (25 MHz / 5) * 120 = 600 MHz -> SYSCLK = 600 MHz
+ *    HCLK (AHB) = 300 MHz, APB2 = 300 MHz, APB1/APB3/APB4 = 150 MHz
+ */
 
-#define BOARD_SYSCLK_FREQUENCY_HZ  600000000UL
-#define BOARD_AHB_FREQUENCY_HZ     300000000UL
-#define BOARD_APB1_FREQUENCY_HZ    150000000UL
-#define BOARD_APB2_FREQUENCY_HZ    150000000UL
-#define BOARD_APB3_FREQUENCY_HZ    150000000UL
-#define BOARD_APB4_FREQUENCY_HZ    150000000UL
+#ifndef RCU_PLL0_PLL0PSC
+#  define RCU_PLL0_PLL0PSC(x)           (x)
+#  define RCU_PLL0_PLL0N(x)             (x)
+#  define RCU_PLL0_PLL0P(x)             (x)
+#  define RCU_PLLADDCTL_PLL0Q(x)        (x)
+#  define RCU_PLL0_PLL0R(x)             (x)
+#  define RCU_CFG0_AHBPSC_CKSYS_DIV2    2U
+#  define RCU_CFG0_APB4PSC_CKAHB_DIV2   2U
+#  define RCU_CFG0_APB3PSC_CKAHB_DIV2   2U
+#  define RCU_CFG0_APB2PSC_CKAHB_DIV1   1U
+#  define RCU_CFG0_APB1PSC_CKAHB_DIV2   2U
+#endif
 
-/* 3. 串口与调试控制台 */
+#define GD32_PLL_PLL0PSC                RCU_PLL0_PLL0PSC(5)
+#define GD32_PLL_PLL0N                  RCU_PLL0_PLL0N(120)
+#define GD32_PLL_PLL0P                  RCU_PLL0_PLL0P(0)        /* DIV1 -> 600 MHz */
+#define GD32_PLL_PLL0Q                  RCU_PLLADDCTL_PLL0Q(1)  /* DIV2 -> 300 MHz */
+#define GD32_PLL_PLL0R                  RCU_PLL0_PLL0R(1)       /* DIV2 -> 300 MHz */
 
-#define BOARD_CONSOLE_USART        0          /* USART0 (PA9/PA10), 115200 8N1 */
-#define BOARD_MAVLINK_TELEM1_USART 1          /* USART1 (PA2/PA3 + CTS/RTS) */
-#define BOARD_MAVLINK_TELEM2_USART 2          /* USART2 (PB10/PB11) */
-#define BOARD_GPS_UART             6          /* 避开 SDIO0 冲突，建议使用 UART6 */
-#define BOARD_RC_UART              7          /* 避开 SDIO0 冲突，建议使用 UART7 */
-#define BOARD_ESC_TLM_USART        5          /* USART5 (PC7 RX) */
+#define GD32_SYSCLK_FREQUENCY           600000000UL
+#define GD32_RCU_CFG0_AHB_PSC           RCU_CFG0_AHBPSC_CKSYS_DIV2
+#define GD32_HCLK_FREQUENCY             (GD32_SYSCLK_FREQUENCY / 2UL)
 
-/* 4. SPI / I2C / CAN / SDIO 启用标识 */
+#define GD32_RCU_CFG0_APB4_PSC          RCU_CFG0_APB4PSC_CKAHB_DIV2
+#define GD32_PCLK4_FREQUENCY            (GD32_HCLK_FREQUENCY / 2UL)
 
-#define BOARD_HAVE_ICM42688P_SPI0  1          /* SPI0: 主 IMU */
-#define BOARD_HAVE_BMI088_SPI1     1          /* SPI1: 冗余 IMU */
-#define BOARD_HAVE_FM25V02A_SPI3   1          /* SPI3: 256Kbit FRAM */
-#define BOARD_HAVE_SENSOR_I2C0     1          /* I2C0: BMP390 + BMM150 */
-#define BOARD_HAVE_EXTMAG_I2C1     1          /* I2C1: 外置磁力计 */
-#define BOARD_HAVE_POWER_I2C2      1          /* I2C2: INA226 功率计 */
-#define BOARD_HAVE_CAN0_FD         1
-#define BOARD_HAVE_CAN1_FD         1
-#define BOARD_HAVE_SDIO0           1
+#define GD32_RCU_CFG0_APB3_PSC          RCU_CFG0_APB3PSC_CKAHB_DIV2
+#define GD32_PCLK3_FREQUENCY            (GD32_HCLK_FREQUENCY / 2UL)
+
+#define GD32_RCU_CFG0_APB2_PSC          RCU_CFG0_APB2PSC_CKAHB_DIV1
+#define GD32_PCLK2_FREQUENCY            (GD32_HCLK_FREQUENCY / 1UL)
+
+#define GD32_RCU_CFG0_APB1_PSC          RCU_CFG0_APB1PSC_CKAHB_DIV2
+#define GD32_PCLK1_FREQUENCY            (GD32_HCLK_FREQUENCY / 2UL)
+
+/* 3. 6 路串口引脚绑定（NSH Console + TELEM1/2 + GPS1 + RC_IN + ESC_TLM） */
+
+#define GPIO_USART0_TX                  (GPIO_USART0_TX_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_USART0_RX                  (GPIO_USART0_RX_1 | GPIO_CFG_SPEED_85MHZ)
+
+#define GPIO_USART1_TX                  (GPIO_USART1_TX_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_USART1_RX                  (GPIO_USART1_RX_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_USART1_CTS                 (GPIO_USART1_CTS_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_USART1_RTS_DE              (GPIO_USART1_RTS_DE_1 | GPIO_CFG_SPEED_85MHZ)
+
+#define GPIO_USART2_TX                  (GPIO_USART2_TX_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_USART2_RX                  (GPIO_USART2_RX_1 | GPIO_CFG_SPEED_85MHZ)
+
+#define GPIO_USART5_TX                  (GPIO_USART5_TX_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_USART5_RX                  (GPIO_USART5_RX_1 | GPIO_CFG_SPEED_85MHZ)
+
+#define GPIO_UART6_TX                   (GPIO_UART6_TX_3 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_UART6_RX                   (GPIO_UART6_RX_3 | GPIO_CFG_SPEED_85MHZ)
+
+#define GPIO_UART7_TX                   (GPIO_UART7_TX_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_UART7_RX                   (GPIO_UART7_RX_1 | GPIO_CFG_SPEED_85MHZ)
+
+/* 4. SPI0 (ICM-42688-P) / SPI1 (BMI088) / SPI3 (FM25V02A FRAM) 引脚绑定 */
+
+#define GPIO_SPI0_SCK_PIN               (GPIO_SPI0_SCK_1  | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_SPI0_MISO_PIN              (GPIO_SPI0_MISO_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_SPI0_MOSI_PIN              (GPIO_SPI0_MOSI_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_SPI0_CS_ICM42688           (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PP | GPIO_CFG_OUT_SET | GPIO_CFG_SPEED_85MHZ | GPIO_CFG_PORT_A | GPIO_CFG_PIN_4)
+
+#define GPIO_SPI1_SCK_PIN               (GPIO_SPI1_SCK_1  | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_SPI1_MISO_PIN              (GPIO_SPI1_MISO_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_SPI1_MOSI_PIN              (GPIO_SPI1_MOSI_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_SPI1_CS_BMI088_ACC         (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PP | GPIO_CFG_OUT_SET | GPIO_CFG_SPEED_85MHZ | GPIO_CFG_PORT_B | GPIO_CFG_PIN_12)
+#define GPIO_SPI1_CS_BMI088_GYR         (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PP | GPIO_CFG_OUT_SET | GPIO_CFG_SPEED_85MHZ | GPIO_CFG_PORT_C | GPIO_CFG_PIN_0)
+
+#define GPIO_SPI3_SCK_PIN               (GPIO_SPI3_SCK_1  | GPIO_CFG_SPEED_60MHZ)
+#define GPIO_SPI3_MISO_PIN              (GPIO_SPI3_MISO_1 | GPIO_CFG_SPEED_60MHZ | GPIO_CFG_PUPD_PULLUP)
+#define GPIO_SPI3_MOSI_PIN              (GPIO_SPI3_MOSI_1 | GPIO_CFG_SPEED_60MHZ)
+#define GPIO_SPI3_CS_FRAM               (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PP | GPIO_CFG_OUT_SET | GPIO_CFG_SPEED_60MHZ | GPIO_CFG_PORT_E | GPIO_CFG_PIN_4)
+
+/* 5. I2C0 / I2C1 / I2C3 引脚绑定 */
+
+#define GPIO_I2C0_SCL                   (GPIO_I2C0_SCL_1 | GPIO_CFG_SPEED_60MHZ)
+#define GPIO_I2C0_SDA                   (GPIO_I2C0_SDA_1 | GPIO_CFG_SPEED_60MHZ)
+
+#define GPIO_I2C1_SCL                   (GPIO_I2C1_SCL_2 | GPIO_CFG_SPEED_60MHZ)
+#define GPIO_I2C1_SDA                   (GPIO_I2C1_SDA_2 | GPIO_CFG_SPEED_60MHZ)
+
+#define GPIO_I2C3_SCL                   (GPIO_I2C3_SCL_1 | GPIO_CFG_SPEED_60MHZ)
+#define GPIO_I2C3_SDA                   (GPIO_I2C3_SDA_1 | GPIO_CFG_SPEED_60MHZ)
+
+/* 6. 8 路电机 PWM/DShot (TIMER0 + TIMER3) 与安全门控 OEn (PE10) */
+
+#define GPIO_MOTOR1_CH                  (GPIO_TIMER0_CH0_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_MOTOR2_CH                  (GPIO_TIMER0_CH1_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_MOTOR3_CH                  (GPIO_TIMER0_CH2_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_MOTOR4_CH                  (GPIO_TIMER0_CH3_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_MOTOR5_CH                  (GPIO_TIMER3_CH0_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_MOTOR6_CH                  (GPIO_TIMER3_CH1_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_MOTOR7_CH                  (GPIO_TIMER3_CH2_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_MOTOR8_CH                  (GPIO_TIMER3_CH3_1 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_PWM_BUFFER_OEN             (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PP | GPIO_CFG_OUT_SET | GPIO_CFG_PUPD_PULLUP | GPIO_CFG_PORT_E | GPIO_CFG_PIN_10)
+
+/* 7. 双路 CAN-FD (CAN0 + CAN2) 与状态/电源控制引脚 */
+
+#define GPIO_CAN0_RX                    (GPIO_CAN0_RX_3 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_CAN0_TX                    (GPIO_CAN0_TX_3 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_CAN0_SILENT                (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PP | GPIO_CFG_OUT_CLR | GPIO_CFG_PORT_D | GPIO_CFG_PIN_3)
+
+#define GPIO_CAN2_RX                    (GPIO_CAN2_RX_2 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_CAN2_TX                    (GPIO_CAN2_TX_2 | GPIO_CFG_SPEED_85MHZ)
+#define GPIO_CAN2_SILENT                (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PP | GPIO_CFG_OUT_CLR | GPIO_CFG_PORT_D | GPIO_CFG_PIN_4)
+
+#define GPIO_VDD_5V_PERIPH_EN           (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PP | GPIO_CFG_OUT_SET | GPIO_CFG_PORT_D | GPIO_CFG_PIN_7)
+#define GPIO_VDD_5V_PERIPH_OC_N         (GPIO_CFG_MODE_INPUT  | GPIO_CFG_PUPD_PULLUP | GPIO_CFG_PORT_D | GPIO_CFG_PIN_8)
+#define GPIO_VDD_3V3_SENSORS_EN         (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PP | GPIO_CFG_OUT_SET | GPIO_CFG_PORT_D | GPIO_CFG_PIN_9)
+#define GPIO_SBUS_INV_SEL               (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PP | GPIO_CFG_OUT_CLR | GPIO_CFG_PORT_G | GPIO_CFG_PIN_3)
+
+#define GPIO_LED_RED_N                  (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_OD | GPIO_CFG_OUT_SET | GPIO_CFG_PORT_E | GPIO_CFG_PIN_3)
+#define GPIO_LED_GREEN_N                (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_OD | GPIO_CFG_OUT_SET | GPIO_CFG_PORT_E | GPIO_CFG_PIN_12)
+#define GPIO_LED_BLUE_N                 (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_OD | GPIO_CFG_OUT_SET | GPIO_CFG_PORT_E | GPIO_CFG_PIN_15)
 
 #endif /* __BOARDS_ARM_GD32H73X_75X_GD32H757_FC_V1_INCLUDE_BOARD_H */

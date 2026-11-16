@@ -1,7 +1,8 @@
-=== M1 主机侧静态编译与单元测试 ===
-M1 host unit test PASS: cache_mpu & memorymap checks succeeded.
-=== 头文件语法检查 (board.h / board_config.h) ===
-board.h & board_config.h syntax check PASS
-=== JSON 元数据与引脚表检查 ===
-firmware.prototype JSON PASS (board_id=65501, summary=gd32_h757-fc-v1)
-pin-matrix.csv loaded: 25 functional domains
+=== [1/4] 生成 KiCad 原理图 (.kicad_sch) 与网表 (.net) ===
+Generated hardware/schematic/gd32_h757_fc_v1.kicad_sch and hardware/schematic/gd32_h757_fc_v1.net (84 signal nets, 32 BOM items).
+=== [2/4] 运行硬件 DRC 零冲突与跨层一致性检查 ===
+[DRC PASS] 84 LQFP144 pins verified: 0 conflicts, 0 illegal ports, C macros & KiCad schematic/netlist consistent (32 BOM items).
+=== [3/4] 编译并运行 M1/M3 主机侧 C11 单元测试 ===
+M1/M3 host unit tests PASS: cache_mpu, PMU LDO lock, 600MHz PLL0, early_init & 8ch PWM map verified.
+=== [4/4] 独立头文件严格语法检查 ===
+ALL CHECKS PASSED.

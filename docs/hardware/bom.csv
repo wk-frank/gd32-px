@@ -1,0 +1,33 @@
+序号,位号(Designator),功能分类,制造商,型号(MPN),封装,数量,关键参数与选型说明,PX4驱动/软件适配状态
+1,U1,主控MCU,GigaDevice,GD32H757ZMT6,LQFP-144(20x20mm),1,Cortex-M7 600MHz 3840KB Flash 1024KB SRAM 3xCAN-FD 内置USBHS PHY,M1/M2 BSP核心目标
+2,U_IMU1,主六轴IMU,TDK InvenSense,ICM-42688-P,LGA-14(2.5x3.0mm),1,超低噪声陀螺仪/加速度计 SPI0(24MHz) + EXTI4 DRDY,PX4 v1.17 原生支持(icm42688p)
+3,U_IMU2,冗余六轴IMU,Bosch Sensortec,BMI088,LGA-16(3.0x4.5mm),1,高抗振双片选工业级IMU SPI1(10MHz) + 双DRDY,PX4 v1.17 原生支持(bmi088)
+4,U_BARO,高精度气压计,Bosch Sensortec,BMP390,LGA-10(2.0x2.0mm),1,相对精度±3Pa 低温漂 I2C0(0x76),PX4 v1.17 原生支持(bmp390)
+5,U_MAG,板载三轴磁力计,Bosch Sensortec,BMM150,WLCSP-12,1,板载航向参考磁力计 I2C0(0x10),PX4 v1.17 原生支持(bmm150)
+6,U_FRAM,参数铁电存储,Infineon,FM25V02A-GTR,SOIC-8,1,256Kbit(32KB) SPI3 FRAM 零擦写延迟 10^14次寿命,PX4 ramtron/mtd 原生支持
+7,U_PWR_MON,数字功率监控(可选板载/PDB),Texas Instruments,INA226AIDGSR,VSSOP-10,1,36V 16-bit 高精度电压/电流/功率计 I2C3(0x41),PX4 v1.17 原生支持(ina226)
+8,U_OR,双电源理想二极管合路,Texas Instruments,LM66200DRLR,SOT-563-6,1,5V_BEC 与 USB_VBUS 自动零压降切换防倒灌,纯硬件保护
+9,U_LDO_MCU,MCU数字域3.3V稳压,Texas Instruments,TLV75733PDBVR,SOT-23-5,1,3.3V/1A 低压差稳压 供MCU VDD/VDDA/VUSBHS/FRAM,上电常开
+10,U_LDO_SNS,传感器超低噪声LDO,Texas Instruments,TPS7A2033PDBVR,SOT-23-5,1,3.3V/300mA 6.5uVRMS超低噪声 受PD9独立使能复位控制,PX4 board_peripheral_reset
+11,U_SW5V,外设5V限流负载开关,Texas Instruments,TPS2553DBVR,SOT-23-6,1,1.5A精准限流 受PD7使能控制 PD8输出过流报警OCn,PX4 电源健康监控
+12,U_CAN0,CAN-FD收发器1,Texas Instruments,TCAN1044VDRBRQ1,SON-8(3x3mm),1,车规级 5Mbps CAN-FD 3.3V VIO直连 ±58V总线耐压,DroneCAN0(PD0/PD1/PD3)
+13,U_CAN2,CAN-FD收发器2,Texas Instruments,TCAN1044VDRBRQ1,SON-8(3x3mm),1,车规级 5Mbps CAN-FD 3.3V VIO直连 ±58V总线耐压,DroneCAN2(PF6/PF7/PD4)
+14,U_BUF1,8路电机驱动缓冲器,Texas Instruments,SN74LVC8T245PWR,TSSOP-24,1,8通道双向缓冲器 OEn由PE10(10k上拉)硬件门控防误转,PWM/双向DShot600(TIMER0+TIMER3)
+15,U_XOR,RC信号可编程反相器,Texas Instruments,SN74LVC1G86DBVR,SOT-23-5,1,单路异或门 PG3=0直通CRSF/ELRS PG3=1硬件反相SBUS,UART7(PE0/PE1)全协议兼容
+16,U_ESD_USB,USB高速ESD阵列,STMicroelectronics,USBLC6-2SC6,SOT-23-6,1,超低电容(0.5pF)适配 USBHS0 480Mbps/12Mbps,USBHS0专用PHY保护
+17,U_ESD_SD,SD卡EMI与ESD滤波,NXP,IP4252CZ16,SON-16,1,集成上拉电阻与ESD钳位 保护SDIO0 4-bit总线,SDIO0高速日志稳定保障
+18,U_ESD_PWM1,M1-M4输出ESD保护,STMicroelectronics,USBLC6-4SC6,SOT-23-6,1,4通道ESD钳位保护电机信号线,硬件防静电
+19,U_ESD_PWM2,M5-M8输出ESD保护,STMicroelectronics,USBLC6-4SC6,SOT-23-6,1,4通道ESD钳位保护电机信号线,硬件防静电
+20,Y1,高速主晶振(HXTAL),NDK,NX3225GA-25.000M-STD-CRG-2,SMD-3225-4P,1,25.000MHz ±10ppm -40~85℃ 工业级无源晶振,PLL0倍频至600MHz基准
+21,Y2,低速RTC晶振(LXTAL),Abracon,ABS07-32.768KHZ-7-T,SMD-3215-2P,1,32.768kHz ±20ppm 供RTC与备份域计时,GD32 LXTAL
+22,Q1,IMU加热MOSFET,Alpha & Omega,AO3400A,SOT-23-3,1,30V 5.7A 低阈值N-MOS 由PB4(TIMER2_CH0)驱动,PX4 heater 模块支持
+23,R_HEAT1..4,IMU加热电阻阵列,Yageo,RC0603FR-07120RL,0603,4,4颗120Ω并联=30Ω 紧贴IMU布局实现恒温控制,约0.36W安全热功率
+24,D_RGB,三色状态LED,Cree LED,CLV1A-FKB-CJ1M1F1BB7R4S3,PLCC-4,1,高亮共阳RGB状态灯 由PE3/PE12/PE15驱动,PX4 rgbled/board_led
+25,BZ1,无源贴片蜂鸣器,Murata,PKMCS0909E4000-R1,SMD-9x9mm,1,4kHz谐振频率 由PB0(TIMER2_CH2)+N-MOS驱动,PX4 tone_alarm
+26,J_USB,USB Type-C接口,Amphenol,12401610E4#2A,SMD-16P,1,USB 2.0 Type-C 母座 CC1/CC2配5.1k下拉Rd,QGC连接与DFU升级
+27,J_SD,MicroSD自弹卡座,Molex,502570-0893,SMD-PushPush,1,带机械CD检测脚(PC13) 抗振锁卡结构,ULog飞行日志存储
+28,J_PWR,电源接口(POWER1),Molex,502585-0670,Clik-Mate-6P,1,Pixhawk标准6Pin电源座(5V/I2C3/VBAT_ADC/IBAT_ADC),主供电与功率监控
+29,J_GPS1,GNSS与安全开关座,JST,SM10B-GHS-TB,GH-10P,1,Pixhawk标准10Pin(UART6+I2C1+PPS+SafetyBtn/LED),GPS1与外置罗盘
+30,J_TEL1_2,数传接口(TELEM1/2),JST,SM06B-GHS-TB,GH-6P,2,Pixhawk标准6Pin(TELEM1带CTS/RTS TELEM2高速),数传与伴飞计算机
+31,J_CAN0_2,双路DroneCAN接口,JST,SM04B-GHS-TB,GH-4P,2,Pixhawk标准4Pin(5V/CAN_H/CAN_L/GND),CAN0与CAN2外设总线
+32,J_DBG,调试口(DSU7),JST,BM06B-SRSS-TB,SH-6P,1,Pixhawk标准6Pin调试座(USART0 NSH + SWDIO/SWCLK),量产烧录与GDB调试
